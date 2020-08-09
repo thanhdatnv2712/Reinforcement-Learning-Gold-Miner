@@ -5,7 +5,7 @@ simplefilter(action='ignore', category=FutureWarning)
 import numpy as np
 from keras.models import Sequential
 from keras.models import model_from_json
-from keras.layers import Dense, Activation, Conv2D, Conv1D
+from keras.layers import Dense, Activation, Conv2D, Flatten
 from keras import optimizers
 from keras import backend as K
 import tensorflow as tf
@@ -60,6 +60,7 @@ class DQN:
       model.add(Activation('relu'))
       model.add(Conv2D(32, (3, 3), strides=(2, 2)))
       model.add(Activation('relu'))
+      model.add(Flatten())
       model.add(Dense(256))
       model.add(Activation("relu"))
       model.add(Dense(self.action_space))
@@ -71,8 +72,9 @@ class DQN:
       return model
     
     def act(self,state):
-      #Get the index of the maximum Q values      
-      a_max = np.argmax(self.model.predict(np.expand_dims(state, axis = 0)))      
+      #Get the index of the maximum Q values   
+      preds = self.model.predict(np.expand_dims(state, axis = 0))   
+      a_max = np.argmax(preds)    
       if (random() < self.epsilon and self.cc <= 1500):
         a_chosen = randrange(self.action_space)
         self.cc += 1
@@ -83,20 +85,21 @@ class DQN:
     def replay(self,samples,batch_size):
       inputs = np.zeros((batch_size, self.input_dim[0], self.input_dim[1], self.input_dim[2]))
       targets = np.zeros((batch_size, self.action_space))
-      
       for i in range(0,batch_size):
-        state = samples[0][i,:]
+        state = samples[0][i]
         action = samples[1][i]
         reward = samples[2][i]
-        new_state = samples[3][i,:]
+        new_state = samples[3][i]
         done= samples[4][i]
-        
         inputs[i,:] = state
-        targets[i,:] = self.target_model.predict(np.expand_dims(state, axis = 0))        
+        if len(state.shape) < 4:
+          state = np.expand_dims(state, axis = 0)
+        preds = self.target_model.predict(state) 
+        targets[i,:] = preds
         if done:
           targets[i,action] = reward # if terminated, only equals reward
         else:
-          Q_future = np.max(self.target_model.predict(np.expand_dims(state, axis = 0)))
+          Q_future = np.max(self.target_model.predict(state))
           targets[i,action] = reward + Q_future * self.gamma
       #Training
       loss = self.model.train_on_batch(inputs, targets)  

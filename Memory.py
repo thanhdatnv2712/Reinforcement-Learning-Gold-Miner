@@ -26,17 +26,17 @@ class Memory:
 
     def push(self, s, a, r, done, s2):
         if self.states is None:
-            self.states = s
+            self.states = [s]
             self.actions = a
             self.rewards = r
             self.dones = done
-            self.states2 = s2
+            self.states2 = [s2]
         else:
-            self.states = np.vstack((self.states,s))
+            self.states.append(s)
             self.actions = np.vstack((self.actions,a))
             self.rewards = np.vstack((self.rewards, r))
             self.dones = np.vstack((self.dones, done))
-            self.states2 = np.vstack((self.states2,s2))
+            self.states2.append(s2)
         
         self.length = self.length + 1
             
@@ -46,17 +46,17 @@ class Memory:
             self.rewards = np.delete(self.rewards,(0), axis = 0)
             self.dones = np.delete(self.dones,(0), axis = 0)
             self.states2 = np.delete(self.states2,(0), axis = 0)           
-            self.length = self.length - 1
-            
+            self.length = self.length - 1         
         
     def sample(self,batch_size):
+        self.states_ = np.array(self.states)
+        self.states2_ = np.array(self.states2)
         if (self.length >= batch_size):
             idx = random.sample(range(0,self.length),batch_size)
-            s = self.states[idx,:]
+            s = self.states_[idx,:]
             a = self.actions[idx,:]
             r = self.rewards[idx,:]
             d = self.dones[idx,:]
-            s2 = self.states2[idx,:]
-                
+            s2 = self.states2_[idx,:]
             return list([s,a,r,s2,d])
                     
