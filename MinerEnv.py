@@ -104,7 +104,7 @@ class MinerEnv:
         self.score_pre = self.state.score
         if score_action > 0:
             #If the DQN agent crafts golds, then it should obtain a positive reward (equal score_action)
-            reward += score_action*3
+            reward += score_action/1000*3
             
         #If the DQN agent crashs into obstacels (Tree, Trap, Swamp), then it should be punished by a negative reward
         if self.state.mapInfo.get_obstacle(self.state.x, self.state.y) == TreeID:  # Tree

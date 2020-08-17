@@ -39,7 +39,6 @@ class DQN:
       self.learning_rate = learning_rate
       self.tau = tau
       
-      self.cc = 0
       #Creating networks
       self.model        = self.create_model() #Creating the DQN model
       self.target_model = self.create_model() #Creating the DQN target model
@@ -70,14 +69,13 @@ class DQN:
       model.compile(optimizer = sgd,
               loss='mse')
       return model
-    
+
     def act(self,state):
       #Get the index of the maximum Q values   
       preds = self.model.predict(np.expand_dims(state, axis = 0))   
       a_max = np.argmax(preds)    
-      if (random() < self.epsilon and self.cc <= 1500):
+      if (random() < self.epsilon):
         a_chosen = randrange(self.action_space)
-        self.cc += 1
       else:
         a_chosen = a_max      
       return a_chosen
