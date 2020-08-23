@@ -12,6 +12,7 @@ import tensorflow as tf
 from random import random, randrange
 
 
+
 # Deep Q Network off-policy
 class DQN: 
    
@@ -55,7 +56,7 @@ class DQN:
       #Two hidden layers (300,300), their activation is ReLu
       #One output layer with action_space of nodes, activation is linear.
       model = Sequential()
-      model.add(Conv2D(16, (3, 3), strides=(2, 2), input_shape=(21, 9, 4)))
+      model.add(Conv2D(16, (3, 3), strides=(2, 2), input_shape=(21, 9, 20)))
       model.add(Activation('relu'))
       model.add(Conv2D(32, (3, 3), strides=(2, 2)))
       model.add(Activation('relu'))
@@ -66,8 +67,21 @@ class DQN:
       model.add(Activation('linear'))   
       # adam = optimizers.adam(lr=self.learning_rate)
       sgd = optimizers.SGD(lr=self.learning_rate, decay=1e-6, momentum=0.95)
+      rms=optimizers.RMSprop(
+            lr=self.learning_rate, rho=0.95, epsilon=0.01
+        )
+      def huber_loss(a, b, in_keras=True):
+          error = a - b
+          quadratic_term = error*error / 2
+          linear_term = abs(error) - 1/2
+          use_linear_term = (abs(error) > 1.0)
+          if in_keras:
+              # Keras won't let us multiply floats by booleans, so we explicitly cast the booleans to floats
+              use_linear_term = tf.cast(use_linear_term, 'float32')
+          return use_linear_term * linear_term + (1-use_linear_term) * quadratic_term
+      
       model.compile(optimizer = sgd,
-              loss='mse')
+              loss=huber_loss)
       return model
 
     def act(self,state):
@@ -90,6 +104,8 @@ class DQN:
         new_state = samples[3][i]
         done= samples[4][i]
         inputs[i,:] = state
+        st = np.array(state)
+        # print('present state : ',st.shape )
         if len(state.shape) < 4:
           state = np.expand_dims(state, axis = 0)
         preds = self.target_model.predict(state) 
