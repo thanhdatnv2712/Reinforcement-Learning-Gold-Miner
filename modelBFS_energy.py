@@ -103,18 +103,19 @@ class BFS_energy:
                 return num_step , value , visited , all_gold , all_lay ,trace
             
             def get_dir(matrix , s , x,y):
-                if s == '2': # turn up
+                if s == '2' and y-1 >=0: # turn up
                     return np.array([x,y-1])
-                elif s == '3': # turn down
+                if s == '3' and  y+1<self.MAP_MAX_Y: # turn down
                     return np.array([x,y+1])
-                elif s == '0': # turn left
+                if s == '0' and x-1 >=0: # turn left
                     return np.array([x-1,y])
-                elif s == '1' : # turn right
+                if s == '1' and x+1 < self.MAP_MAX_X: # turn right
                     return np.array([x+1,y])
+                return np.array([x,y])
 
             
             num_step, value, visited, all_gold, all_lay,tr =  reset()
-            next_time = [-5,-20,-40,-100,-120]
+            next_time = [-5,-20,-40,-10000,-1200000]
 
             # Set lai map 
 
@@ -158,11 +159,23 @@ class BFS_energy:
                 trace[ix][iy] += '4'
 
                 act = trace[ix][iy][0]
-                if Min == inf or energy <=10: # check khi nang luong con lai ko the di den duoc mo vang ==> rest
+                if energy <=10: # check khi nang luong con lai ko the di den duoc mo vang ==> rest
                     act = '4'
                     action = '4'
-                    next_move_value = 0
+                    next_move_value = -inf
                     di = np.array([x,y])
+                elif Min == inf :
+                    Min_step_value = -inf
+                    step = ''
+                    move = [0,1,2,3]
+                    for i in move:
+                        next_pos = get_dir(maps,str(i),x,y)
+                        if x == next_pos[0] and y == next_pos[1]:
+                            continue
+                        if Min_step_value <  maps[next_pos[0]][next_pos[1]]:
+                            Min_step_value = maps[next_pos[0]][next_pos[1]]
+                            step = str(i)
+                    next_move_value = Min_step_value
                 else:
                     di = get_dir(maps,act,x,y)
                     next_move_value = maps[di[0]][di[1]]
