@@ -41,6 +41,7 @@ class MinerEnv:
             traceback.print_exc()
 
     # Functions are customized by client
+    # self.state.map
     def get_state(self):
         # Building the map
         view = np.zeros([self.state.mapInfo.max_x + 1, self.state.mapInfo.max_y + 1], dtype=int)
@@ -62,10 +63,10 @@ class MinerEnv:
         DQNState.append(self.state.y)
         DQNState.append(self.state.energy)
         #Add position of bots 
-        # for player in self.state.players:
-        #     if player["playerId"] != self.state.id:
-        #         DQNState.append(player["posx"])
-        #         DQNState.append(player["posy"])
+        for player in self.state.players:
+            if player["playerId"] != self.state.id:
+                DQNState.append(player["posx"])
+                DQNState.append(player["posy"])
                 
         #Convert the DQNState from list to array for training
         DQNState = np.array(DQNState)
@@ -126,13 +127,13 @@ class MinerEnv:
         # If out of the map, then the DQN agent should be punished by a larger nagative reward.
         if self.state.status == State.STATUS_ELIMINATED_WENT_OUT_MAP:
             print("out of map")
-            reward += -100
+            reward += -10
             
         #Run out of energy, then the DQN agent should be punished by a larger nagative reward.
         if self.state.status == State.STATUS_ELIMINATED_OUT_OF_ENERGY:
-
+            # print/
             print("out of energy : " ,self.state.energy)
-            reward += -30
+            reward += -10
         # print ("reward",reward)
         return reward
 

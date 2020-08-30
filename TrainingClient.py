@@ -59,40 +59,88 @@ train = False #The variable is used to indicate that the replay starts, and the 
 
 modelBFS = BFS_energy()
 all_map = [[],[],[],[],[],[]]
+all_step_map = [[],[],[],[],[],[]]
+all_m = [[],[],[],[],[],[]]
 print(all_map[1])
-for e in range(3):
-    for idmap in range(1,6):
-        x = np.random.randint(MAP_MAX_X) 
-        y = np.random.randint(MAP_MAX_Y)
-        print('map',idmap)
-        request = ("map" + str(idmap) + "," + str(x) + "," + str(y) + ",50,100")
-        minerEnv.send_map_info(request)
-        minerEnv.reset()
-        s_next = minerEnv.get_state()
-        total_reward = 0
+for idmap in range(1,7):
+    all_step = []
+    # idmap = 6 ngon
+    # 5 : ngon
+    # for idmap in range(1,7):
+    txt_error = 'map'+str(idmap)+'.txt'
+    files = open(txt_error,'w')
+    for i in range(21) :
+        for j in range(9) :
 
-        for step in range(0,MAX_STEP):
-            action = modelBFS.act(s_next)
-            minerEnv.step(action)
-            reward = minerEnv.get_reward()
+            x = i
+            y = j
+            modelBFS = BFS_energy()
+            # print('map',idmap)
+            request = ("map" + str(idmap) + "," + str(x) + "," + str(y) + ",50,100")
+            minerEnv.send_map_info(request)
+            minerEnv.reset()
             s_next = minerEnv.get_state()
-            energy = s_next[...,MAP_MAX_X*MAP_MAX_Y+2:MAP_MAX_X*MAP_MAX_Y+3]
-            print('energy: ',energy)
-            print('reward : ',reward,end= ' ')
-            total_reward += reward
-            print('total reward : ' ,total_reward)
-            print('------------------------------------------------------------------')
-            terminate = minerEnv.check_terminate()
-            print('num lay :',modelBFS.cnt)
-            if terminate == True:
-                break
-        all_map[idmap].append(total_reward)
-        # minerEnv.step(str(tr))
-# 
-#
+            total_reward = 0
+            late_state = []
+            ms = np.array(s_next[...,0:MAP_MAX_X*MAP_MAX_Y]).reshape(MAP_MAX_X,MAP_MAX_Y)
+            # print(ms[x][y])
 
-for i in range(1,6):
-    print('map',i,'=',all_map[i])
+            for step in range(0,MAX_STEP):
+                
+                action = modelBFS.act(s_next)
+                # print('action : ',action)
+                all_step.append(int(action))
+                late_state.append(s_next)
+                minerEnv.step(action)
+                reward = minerEnv.get_reward()
+                s_next = minerEnv.get_state()
+                energy = s_next[...,MAP_MAX_X*MAP_MAX_Y+2:MAP_MAX_X*MAP_MAX_Y+3]
+                # print('energy: ',energy)
+                # print('reward : ',reward)
+                total_reward += reward
+                # print('total reward : ' ,total_reward)
+                # print('------------------------------------------------------------------')
+                terminate = minerEnv.check_terminate()
+                # print('num lay :',modelBFS.cnt)
+                if terminate == True:
+
+                    break
+            print('total_reward',total_reward)
+            if total_reward <= 500 or energy < 0:
+                print('--------ERROR-----------')
+                
+                print('pos' , x,y)
+                print('step : ', all_step)
+                # files.writelines('pos: '+str(x)+','+str(y)+'\n')
+                maps = late_state[-1][...,0:MAP_MAX_X*MAP_MAX_Y]
+                x,y = late_state[-1][...,MAP_MAX_X*MAP_MAX_Y:MAP_MAX_X*MAP_MAX_Y+2]
+                en = late_state[-1][...,MAP_MAX_X*MAP_MAX_Y+2:MAP_MAX_X*MAP_MAX_Y+3]
+                print('late energy :',en)
+                print('late_pos',x,y)
+                print('late action ',action )
+                # last_pos = s_next('')
+                maps = np.array(maps).reshape(21,9)
+                print('pos_val :', maps[x][y])
+                maps[x][y] = 7
+                print(maps)
+                
+            # else:
+            #     all_map[idmap].append(total_reward)
+            #     print('total reward : ', total_reward)
+            #     print(all_step)
+            # print('-------------------------------------------------------------------------------------------')
+            # minerEnv.step(str(tr))
+    # 
+    #       
+    # files.close()
+    # for id in range(1,6):
+    #     print('-----------st------------------')
+    #     for i in range(len(all_map[id])):
+    #         print(all_map[id][i])
+    #         # print(all_map[id][i])
+    #         maps = np.array(all_m[id][i]).reshape(21,9)
+    #         print(maps)
+    #     print('-------------ed-----------------')
 
 
 

@@ -6,13 +6,11 @@ class BFS_energy:
                 ,MAP_MAX_X = 21
                 ,MAP_MAX_Y = 9
                 ,damlay = -5
-                ,step = 100
-                ,next_time = {0:-5,-5:-20,-20:-40,-40:-100,-100:-100}):
+                ,next_time = {0:-5,-5:-20,-20:-40,-40:-100000,-100000:-100000}):
         self.cnt = cnt # dem so lan buoc vo dam lay
         self.MAP_MAX_X = MAP_MAX_X
         self.MAP_MAX_Y = MAP_MAX_Y
         self.next_time = next_time
-        self.step = step # so luot choi con lai
         self.damlay = damlay
     #/*
     #   next_time : so nang luong tinh theo lan buoc vao dam lay
@@ -44,10 +42,7 @@ class BFS_energy:
                     if visited[r][l] == 0:
                         matrix[r][l] = self.next_time[current]
                 current = self.next_time[current]
-            if current >= 40:
-                for p in all_lay:
-                    visited[p[0]][p[1]] = 1
-            if col+1 < self.MAP_MAX_Y and row >=0 and visited[row][col+1] == 0 :
+            if col+1 < self.MAP_MAX_Y and row >=0 and visited[row][col+1] == 0 and energy + matrix[row][col+1] > 0:
                 q.put((row, col+1))
                 trace[row][col+1] = trace[row][col] + "3"
                 visited[row][col+1] = 1
@@ -55,15 +50,11 @@ class BFS_energy:
                 if matrix[row][col+1] >0:
                     value[row][col+1] = value[row][col] + 4
                 else:
-                    if (row,col+1) in all_lay:
-                        value[row][col+1] = value[row][col] -10*matrix[row][col+1]
-                    else:
-                        value[row][col+1] = value[row][col] - matrix[row][col+1]
-                    
+                    value[row][col+1] = value[row][col] - matrix[row][col+1]
 
 
 
-            if row+1 < self.MAP_MAX_X and col >=0 and visited[row+1][col] == 0 :
+            if row+1 < self.MAP_MAX_X and col >=0 and visited[row+1][col] == 0 and energy + matrix[row+1][col] > 0:
                 q.put((row+1, col))
                 trace[row+1][col] = trace[row][col] + "1"
                 visited[row+1][col] = 1
@@ -71,30 +62,22 @@ class BFS_energy:
                 if matrix[row+1][col] >0:
                     value[row+1][col] = value[row][col] + 4
                 else:
-                    if (row+1,col) in all_lay:
-                        value[row+1][col] = value[row][col] - 10*matrix[row+1][col]
-                    else :
-                        value[row+1][col] = value[row][col] - matrix[row+1][col]
-                    
+                    value[row+1][col] = value[row][col] - matrix[row+1][col]
 
 
-            if 0 <= col-1 and row < self.MAP_MAX_X and visited[row][col-1] == 0 :
+            if 0 <= col-1 and row < self.MAP_MAX_X and visited[row][col-1] == 0 and energy + matrix[row][col-1] > 0:
                 q.put((row, col-1))
                 trace[row][col-1] = trace[row][col] + "2"
                 visited[row][col-1] = 1
-                num_step[row][col-1] = num_step[row][col] + 4
+                num_step[row][col-1] = num_step[row][col] +1
                 if matrix[row][col-1] >0:
-                    value[row][col-1] = value[row][col] +1
+                    value[row][col-1] = value[row][col] +4
             
                 else:
-                    if (row,col-1) in all_lay:
-                        value[row][col-1] = value[row][col] - 10*matrix[row][col-1]
-                    else:
-                        value[row][col-1] = value[row][col] - matrix[row][col-1]
-                    
+                    value[row][col-1] = value[row][col] - matrix[row][col-1]
 
 
-            if 0 <= row-1 and col < self.MAP_MAX_Y and visited[row-1][col] == 0 :
+            if 0 <= row-1 and col < self.MAP_MAX_Y and visited[row-1][col] == 0 and energy + matrix[row-1][col] > 0:
                 q.put((row-1, col))
                 trace[row-1][col] = trace[row][col] + "0"
                 visited[row-1][col] = 1
@@ -102,10 +85,7 @@ class BFS_energy:
                 if matrix[row-1][col] >0:
                     value[row-1][col] = value[row][col] + 4
                 else:
-                    if (row-1,col) in all_lay:
-                        value[row-1][col] = value[row][col] - 10*matrix[row-1][col]
-                    else :
-                        value[row-1][col] = value[row][col] - matrix[row-1][col]
+                    value[row-1][col] = value[row][col] - matrix[row-1][col]
 
         return num_step, value, trace, all_gold  
 
@@ -115,13 +95,6 @@ class BFS_energy:
             maps = np.array(s[...,0:self.MAP_MAX_X*self.MAP_MAX_Y]).reshape(self.MAP_MAX_X,self.MAP_MAX_Y)
             pos = np.array(s[...,self.MAP_MAX_X*self.MAP_MAX_Y : self.MAP_MAX_X*self.MAP_MAX_Y+2])
             energy = s[...,self.MAP_MAX_X*self.MAP_MAX_Y+2:self.MAP_MAX_X*self.MAP_MAX_Y+3]
-            bot1 = s[...,self.MAP_MAX_X*self.MAP_MAX_Y+3:self.MAP_MAX_X*self.MAP_MAX_Y+5]
-            bot2 = s[...,self.MAP_MAX_X*self.MAP_MAX_Y+5:self.MAP_MAX_X*self.MAP_MAX_Y+7]
-            bot3 = s[...,self.MAP_MAX_X*self.MAP_MAX_Y+7:self.MAP_MAX_X*self.MAP_MAX_Y+9]
-            bot = []
-            bot.append(bot1)
-            bot.append(bot2)
-            bot.append(bot3)
             energy = energy[0]
             count = 0
             inf = 10000000000000000
@@ -160,19 +133,16 @@ class BFS_energy:
                     elif(maps[i][j] == -1) : #gap rung
                         maps[i][j] = -20
                     elif maps[i][j] == -2: #gap bay
-                        maps[i][j] = -2
+                        maps[i][j] = -1
                     elif maps[i][j] == -3: # gap dam lay
                         maps[i][j] = self.damlay
-                        if self.damlay + 50 <= 0:
-                            visited[i][j] = 1
                         all_lay.append((i,j))
                     else :
-                        # if visited[i][j] == 0:
-                            all_gold.append((i,j))
+                        all_gold.append((i,j))
             
             
             
-            # # #mining:
+            #mining:
             if maps[x][y] > 0 :
                 if energy > 5: 
                     # print("gold : ",maps[x][y], (x,y))
@@ -189,59 +159,33 @@ class BFS_energy:
                 # */      
                 nstep, value, trace , coord_gold= self.BFS(maps,num_step,value,visited,tr,all_gold,all_lay,x,y,energy,count)
                 Min = inf
-                # print(nstep)
-                # print(trace)
-                # print(value)
-
                 ix , iy = x,y        
-                point = {}
-                # print('---------------------------------------------------')
-                
                 for idx,idy in coord_gold:
-                    step_val = self.step - nstep[idx][idy]
-                    
-                    num_craft = 0
-                    val = 0
-                    if step_val <= 0:
-                        val = -100000000
-                    else :
-                        num_craft = maps[idx][idy]/50
-                           
-                        if step_val > num_craft:
-                            val = (num_craft)*50
-                            # print('val: ', (idx,idy),step_val)
-                        else:
-                            val = (num_craft - self.step)*50
-                    
-                    point[(idx,idy)] =  -(value[idx][idy]) + val/(nstep[idx][idy] + 4 +num_craft)
-                    # print('point :',(idx,idy),maps[idx][idy], point[(idx,idy)],val,nstep[idx][idy],value[idx][idy] )
-                Max = -inf
-                for idx,idy in coord_gold:
-                    if Max < point[(idx,idy)]:
-                        Max = point[(idx,idy)]
+                    if Min > value[idx][idy] and value[idx][idy]!=0:
+                        Min = value[idx][idy]
                         ix = idx
                         iy = idy
-                trace[ix][iy] += '4
+                trace[ix][iy] += '4'
+
                 act = trace[ix][iy][0]
                 if energy <=40: # check khi nang luong con lai ko the di den duoc mo vang ==> rest
                     act = '4'
                     action = '4'
                     next_move_value = -inf
                     di = np.array([x,y])
-                elif Max == -inf :
+                elif Min == inf :
                     Min_step_value = -inf
                     step = ''
                     far = -inf
                     p = [x,y]
                     for i in range(21):
                         for j in range(9):
-                            if far < nstep[i][j] and trace[i][j]!='':
+                            if far < nstep[i][j]:
                                 far = nstep[i][j]
-                                # print(trace[i][j])
                                 action = trace[i][j][0]
                                 p = (i,j)
                             elif far == nstep[i][j]:
-                                if value[i][j] < value[p[0]][p[1]]:
+                                if value[i][j] < value[p[0][p[1]]]:
                                     p = (i,j)
                                     action = trace[i][j][0]
                     pos = get_dir(maps,action,x,y)
@@ -263,5 +207,4 @@ class BFS_energy:
                     # print('into lay')
                     self.damlay = next_time[self.damlay]
             # print('lay : ' , self.cnt,energy,(x,y),'->',(next_pos[0],next_pos[1]))
-            self.step -=1
             return action
