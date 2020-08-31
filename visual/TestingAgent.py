@@ -44,11 +44,12 @@ try:
             envsGame.render(vs["map"], vs["agent"], vs["bot"], vs["players_info"], step)
             # action = agent.action(s) # Getting an action from the trained model
             action = bfs_agent.act(s)
-            print("next action = ", action)
+            
             minerEnv.step(str(action))  # Performing the action in order to obtain the new state
             s_next, vs = minerEnv.get_state()  # Getting a new state
             s = s_next
             step += 1
+            print("next action = ", action, 'energy: ', minerEnv.state.energy)
         except Exception as e:
             import traceback
             traceback.print_exc()

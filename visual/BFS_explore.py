@@ -290,9 +290,14 @@ class BFS_energy:
                             # print('val: ', (idx,idy),step_val)
                         else:
                             val = (num_craft - self.step)*50
-                    
+                    add_point = 0
+                    if 1000 > maps[idx][idy] >= 500:
+                        val+=50
+                    if maps[idx][idy] >= 1000:
+                        val+=100
+                
                     point[(idx,idy)] =  -(value[idx][idy]) + val/(num_step[idx][idy]+4+num_craft)
-                    # print('point :',(idx,idy),maps[idx][idy], point[(idx,idy)],val,nstep[idx][idy],value[idx][idy] )
+                    print('point :',(idx,idy),maps[idx][idy], point[(idx,idy)],val,nstep[idx][idy],value[idx][idy] )
                 d = [[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]]
                 # if len(self.stack)>1:
 
@@ -312,7 +317,7 @@ class BFS_energy:
 
                                 # self.stack.append((xx,yy))
                                 if point[(xx,yy)] > 0 :
-                                    point[(xx,yy)]*= 10
+                                    point[(xx,yy)] *= 10
                                 else :
                                     point[(xx,yy)] *=10
 
@@ -325,7 +330,7 @@ class BFS_energy:
                 trace[ix][iy] += '4'
                 # if
                 act = trace[ix][iy][0]
-                if energy <=40: # check khi nang luong con lai ko the di den duoc mo vang ==> rest
+                if energy <23: # check khi nang luong con lai ko the di den duoc mo vang ==> rest
                     act = '4'
                     action = '4'
                     next_move_value = -inf
