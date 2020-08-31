@@ -85,15 +85,16 @@ class MinerEnv:
         DQNState = view.flatten().tolist() #Flattening the map matrix to a vector
         DQNState = mapID + DQNState + gold.flatten().tolist()
         # ## BFS 
-        # BFS_state = mapOrigin.flatten().tolist()
-        # BFS_state.append(self.state.x)
-        # BFS_state.append(self.state.y)
-        # BFS_state.append(self.state.energy)
-        DQNState = np.array(DQNState)
+        mapOrigin = np.transpose(mapOrigin)
+        BFS_state = mapOrigin.flatten().tolist()
+        BFS_state.append(self.state.x)
+        BFS_state.append(self.state.y)
+        BFS_state.append(self.state.energy)
+        # DQNState = np.array(DQNState)
         ## -> origin state
-        return DQNState, envs_dict
+        # return DQNState, envs_dict
         # ### -> BFS state
-        # return np.array(BFS_state), envs_dict
+        return np.array(BFS_state), envs_dict
 
     def check_terminate(self):
         return self.state.status != State.STATUS_PLAYING

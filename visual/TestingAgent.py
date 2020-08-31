@@ -2,10 +2,10 @@ from warnings import simplefilter
 simplefilter(action='ignore', category=FutureWarning)
 
 import sys
-import torch
+# import torch
 from MinerEnv import MinerEnv
 import numpy as np
-from DQNModel import Agent 
+# from DQNModel import Agent 
 from envsGame import envsGame
 from BFS_explore import BFS_energy
 
@@ -24,7 +24,7 @@ if len(sys.argv) == 3:
     PORT = int(sys.argv[2])
 
 # load json and create model
-agent = Agent(218, 6, -1)
+# agent = Agent(218, 6, -1)
 # bfs_agent = BFS_energy()
 envsGame = envsGame()
 
@@ -38,11 +38,12 @@ try:
     minerEnv.reset()
     s, vs = minerEnv.get_state()  ##Getting an initial state
     step = 0
+    bfs_agent = BFS_energy()
     while not minerEnv.check_terminate():
         try:
             envsGame.render(vs["map"], vs["agent"], vs["bot"], vs["players_info"], step)
-            action = agent.action(s) # Getting an action from the trained model
-            # action = bfs_agent.act(s)
+            # action = agent.action(s) # Getting an action from the trained model
+            action = bfs_agent.act(s)
             print("next action = ", action)
             minerEnv.step(str(action))  # Performing the action in order to obtain the new state
             s_next, vs = minerEnv.get_state()  # Getting a new state
