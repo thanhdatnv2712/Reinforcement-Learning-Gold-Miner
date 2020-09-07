@@ -62,7 +62,7 @@ all_map = [[],[],[],[],[],[]]
 all_step_map = [[],[],[],[],[],[]]
 all_m = [[],[],[],[],[],[]]
 print(all_map[1])
-for idmap in range(1,7):
+for idmap in range(1,13):
     all_step = []
     # idmap = 6 ngon
     # 5 : ngon
@@ -74,7 +74,7 @@ for idmap in range(1,7):
 
             x = i
             y = j
-            modelBFS = BFS_energy()
+            # modelBFS = BFS_energy()
             # print('map',idmap)
             request = ("map" + str(idmap) + "," + str(x) + "," + str(y) + ",50,100")
             minerEnv.send_map_info(request)
@@ -83,6 +83,16 @@ for idmap in range(1,7):
             total_reward = 0
             late_state = []
             ms = np.array(s_next[...,0:MAP_MAX_X*MAP_MAX_Y]).reshape(MAP_MAX_X,MAP_MAX_Y)
+            bots = []
+            pos = np.array(s_next[...,MAP_MAX_X*MAP_MAX_Y : MAP_MAX_X*MAP_MAX_Y+2])
+            bot1 = s_next[...,MAP_MAX_X*MAP_MAX_Y+3:MAP_MAX_X*MAP_MAX_Y+5]
+            bot2 = s_next[...,MAP_MAX_X*MAP_MAX_Y+5:MAP_MAX_X*MAP_MAX_Y+7]
+            bot3 = s_next[...,MAP_MAX_X*MAP_MAX_Y+7:MAP_MAX_X*MAP_MAX_Y+9]
+            bots.append(bot1)
+            bots.append(bot2)
+            bots.append(bot3)
+            num = np.zeros(shape = (21,9),dtype = np.int32)
+            modelBFS = BFS_energy(pre_pos=bots,start_x = pos[0],start_y = pos[1], player_pos=pos,num = num)
             # print(ms[x][y])
 
             for step in range(0,MAX_STEP):
@@ -106,23 +116,23 @@ for idmap in range(1,7):
 
                     break
             print('total_reward',total_reward)
-            if total_reward <= 500 or energy < 0:
+            if total_reward <= 1500 or energy < 0:
                 print('--------ERROR-----------')
                 
-                print('pos' , x,y)
-                print('step : ', all_step)
-                # files.writelines('pos: '+str(x)+','+str(y)+'\n')
-                maps = late_state[-1][...,0:MAP_MAX_X*MAP_MAX_Y]
-                x,y = late_state[-1][...,MAP_MAX_X*MAP_MAX_Y:MAP_MAX_X*MAP_MAX_Y+2]
-                en = late_state[-1][...,MAP_MAX_X*MAP_MAX_Y+2:MAP_MAX_X*MAP_MAX_Y+3]
-                print('late energy :',en)
-                print('late_pos',x,y)
-                print('late action ',action )
-                # last_pos = s_next('')
-                maps = np.array(maps).reshape(21,9)
-                print('pos_val :', maps[x][y])
-                maps[x][y] = 7
-                print(maps)
+                # print('pos' , x,y)
+                # print('step : ', all_step)
+                files.writelines('pos: '+str(x)+','+str(y)+'   '+str(total_reward)+ '\n')
+                # maps = late_state[-1][...,0:MAP_MAX_X*MAP_MAX_Y]
+                # x,y = late_state[-1][...,MAP_MAX_X*MAP_MAX_Y:MAP_MAX_X*MAP_MAX_Y+2]
+                # en = late_state[-1][...,MAP_MAX_X*MAP_MAX_Y+2:MAP_MAX_X*MAP_MAX_Y+3]
+                # print('late energy :',en)
+                # print('late_pos',x,y)
+                # print('late action ',action )
+                # # last_pos = s_next('')
+                # maps = np.array(maps).reshape(21,9)
+                # print('pos_val :', maps[x][y])
+                # maps[x][y] = 7
+                # print(maps)
                 
             # else:
             #     all_map[idmap].append(total_reward)

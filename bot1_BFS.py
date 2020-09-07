@@ -382,7 +382,7 @@ class BFS_energy:
                     add_point = 0
                     
                 
-                    point[(idx,idy)] =  -1.2*(value[idx][idy])+ val/(nstep[idx][idy]+4+num_craft)
+                    point[(idx,idy)] =  -(value[idx][idy])+ val/(nstep[idx][idy]+4+num_craft)*(self.step) 
                     # print('point :',(idx,idy),maps[idx][idy], point[(idx,idy)],val,nstep[idx][idy],value[idx][idy] )
                     if 1000 > val >= 250:
                         point[(idx,idy)]+=100

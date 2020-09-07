@@ -8,3 +8,7 @@ pip install -r requirements.txt
 ```
 python TrainingClient.py
 ```
+## bot
+
+bot1_BFS.py
+bot2_BFS.py
